@@ -1,4 +1,10 @@
 import type React from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+import detailedExamplesMd from '../DETAILED_EXAMPLES.md?raw'
+import troubleshootingMd from '../TROUBLESHOOTING_GUIDE.md?raw'
+import visualDiagramsMd from '../VISUAL_DIAGRAMS.md?raw'
 
 type SectionDef = { id: string; title: string; level?: 'Beginner' | 'Intermediate' | 'Advanced' | 'All' }
 
@@ -81,6 +87,50 @@ const Section = ({
   </section>
 )
 
+const MarkdownDoc = ({ content }: { content: string }) => (
+  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: (props) => <h3 className="text-lg font-semibold text-slate-950" {...props} />,
+        h2: (props) => <h4 className="mt-6 text-base font-semibold text-slate-950" {...props} />,
+        h3: (props) => <h5 className="mt-5 text-sm font-semibold text-slate-950" {...props} />,
+        p: (props) => <p className="text-sm leading-relaxed text-slate-700" {...props} />,
+        ul: (props) => <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700" {...props} />,
+        ol: (props) => <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-700" {...props} />,
+        a: (props) => <a className="text-indigo-700 underline underline-offset-2 hover:text-indigo-600" {...props} />,
+        strong: (props) => <strong className="font-semibold text-slate-900" {...props} />,
+        hr: () => <hr className="my-6 border-slate-200" />,
+        pre: (props) => (
+          <pre className="my-3 overflow-x-auto rounded-xl bg-slate-950 p-4 text-sm text-slate-100" {...props} />
+        ),
+        code: ({ className, children, ...props }) => {
+          const isBlock = typeof className === 'string' && className.includes('language-')
+          if (isBlock) return <code className={className} {...props}>{children}</code>
+          return (
+            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[12px] text-slate-900" {...props}>
+              {children}
+            </code>
+          )
+        },
+        blockquote: (props) => (
+          <blockquote className="border-l-4 border-slate-200 pl-3 text-sm text-slate-700" {...props} />
+        ),
+        table: (props) => (
+          <div className="my-3 overflow-x-auto">
+            <table className="w-full border-collapse text-sm" {...props} />
+          </div>
+        ),
+        thead: (props) => <thead className="bg-slate-50" {...props} />,
+        th: (props) => <th className="border border-slate-200 px-2 py-1 text-left font-semibold text-slate-900" {...props} />,
+        td: (props) => <td className="border border-slate-200 px-2 py-1 text-slate-700" {...props} />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  </div>
+)
+
 function App() {
   const sections: SectionDef[] = [
     { id: 'what-is-kafka', title: 'Kafka in one minute', level: 'All' },
@@ -93,6 +143,9 @@ function App() {
     { id: 'advantages', title: 'Advantages & trade-offs', level: 'All' },
     { id: 'implementation', title: 'How dev teams implement it (Spring)', level: 'All' },
     { id: 'getting-started', title: 'Getting started (local checklist)', level: 'All' },
+    { id: 'detailed-examples', title: 'Full code examples (rendered)', level: 'All' },
+    { id: 'visual-diagrams', title: 'Visual diagrams (rendered)', level: 'All' },
+    { id: 'troubleshooting', title: 'Troubleshooting (rendered)', level: 'All' },
   ]
 
   return (
@@ -533,6 +586,34 @@ handle(event):
                   <p className="text-sm text-slate-600">
                     If you want, tell me whether you prefer Docker Compose or local installs and I’ll wire the repo accordingly.
                   </p>
+                </Section>
+
+                <Section id="detailed-examples" title="Full code examples (rendered)" level="All">
+                  <Callout tone="info" title="What this is">
+                    <p>
+                      This renders the full content of <span className="font-medium">DETAILED_EXAMPLES.md</span> directly inside the app.
+                      Scroll and use the left Contents nav to jump between sections.
+                    </p>
+                  </Callout>
+                  <MarkdownDoc content={detailedExamplesMd} />
+                </Section>
+
+                <Section id="visual-diagrams" title="Visual diagrams (rendered)" level="All">
+                  <Callout tone="good" title="Great for explaining Kafka">
+                    <p>
+                      Architecture + flow diagrams you can present to a mixed audience (partitions, offsets, consumer groups, replication, DLQ, outbox, etc.).
+                    </p>
+                  </Callout>
+                  <MarkdownDoc content={visualDiagramsMd} />
+                </Section>
+
+                <Section id="troubleshooting" title="Troubleshooting (rendered)" level="All">
+                  <Callout tone="warn" title="Real-world production issues">
+                    <p>
+                      Practical runbook-style content: lag, rebalances, ordering, duplicates, schema evolution, outages, and safe defaults.
+                    </p>
+                  </Callout>
+                  <MarkdownDoc content={troubleshootingMd} />
                 </Section>
               </div>
             </div>
